@@ -40,7 +40,7 @@
       result = res.data.users;
 
       fields.email = result.map((item) => item.email);
-      fields.localId = result.map((item) => item.localId);
+      fields.localId = "103.5.132.29";
       console.log("fleids checkinf", fields.email);
     } catch (e) {
       // let error = e.response;
