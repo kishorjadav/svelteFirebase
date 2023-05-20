@@ -1,6 +1,6 @@
 <script>
   import { onMount } from "svelte";
-  import images from "../images/netflix-logo-png-2562.png";
+
 
   let mini = true;
   let openSidebar;
