@@ -25,6 +25,9 @@
 
   import { accessStore } from "../../cookies/cookieStore";
 
+  import ColorPicker from "svelte-awesome-color-picker";
+  import Dropzone from "svelte-file-dropzone/Dropzone.svelte";
+
   const toast = useToast();
   const fetch = useAxios();
   // let cors = require("cors");
@@ -37,9 +40,27 @@
   let fields = {
     email: "",
     firstName: "",
+    color: "",
+    photo: "",
+    pdf: "",
   };
 
+  let hex; // or hsv or hex
+
   let arrLists = [];
+
+  let files = {
+    accepted: [],
+    rejected: [],
+  };
+
+  let pdffiles = {
+    accepted: [],
+    rejected: [],
+  };
+
+  let temp = "";
+  let selectedImage = null;
 
   onMount(async () => {
     fetchData();
@@ -57,21 +78,18 @@
   // fetch data
   $: fetchData = async () => {
     try {
-      const res = await axios.post(
-        "https://api.ipify.org/?format=json",
-        {
-          idToken: $accessStore,
-        },
-        config
-      );
-      result = res;
-      console.log("sfsffs", result);
-
+      // const res = await axios.post(
+      //   "https://api.ipify.org/?format=json",
+      //   {
+      //     idToken: $accessStore,
+      //   },
+      //   config
+      // );
+      // result = res;
+      // console.log("sfsffs", result);
       // https://api.ipify.org/?format=json
-
       // https://sveltekit-auth-39155-default-rtdb.firebaseio.com/
       // console.log("reat", result);
-
       // const querySnapshots = await collection(db, "customers");
       // const colRef = collection(db, "customers");
       // const docsSnap = await getDocs(colRef);
@@ -91,7 +109,7 @@
           console.log("auth", db);
 
           // later...
-          console.log(values);
+          console.log(values, (values.color = hex));
         } catch (e) {
           toast.error("error");
           console.log("error", e.response.data.error.message);
@@ -108,6 +126,92 @@
   let closePopup = (event: any) => {
     addCustomerPopup = false;
   };
+
+  // Image picker with size calculator
+  function handleFilesSelect(e) {
+    const { acceptedFiles, fileRejections } = e.detail;
+    files.accepted = [...files.accepted, ...acceptedFiles];
+    files.rejected = [...files.rejected, ...fileRejections];
+
+    if (files.accepted && files.accepted[0].size > 2000000) {
+      console.log("failed", files.accepted[0].size);
+      handleRemoveAll();
+      toast.error("image size should be less than 2MB");
+    } else {
+      console.log("success", e);
+      e.preventDefault();
+      const imgfile = e.detail.acceptedFiles[0];
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        selectedImage = reader.result;
+      };
+
+      if (imgfile) {
+        reader.readAsDataURL(imgfile);
+      }
+    }
+
+    // const file = e.target.files[0];
+    console.log(e);
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      selectedImage = files.accepted[0].path;
+    };
+
+    // if (file) {
+    //   reader.readAsDataURL(file);
+    // }
+    console.log("files.accepted ", files.accepted);
+  }
+  console.log("files.accepted ", files.accepted);
+
+  // Checking for file size
+  const units = ["bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+
+  $: bytesCkeck = (el: any) => {
+    if (el.innerHTML.length) {
+      let x = el.innerHTML;
+      let l = 0,
+        n = parseInt(x, 10) || 0;
+
+      while (n >= 1024 && ++l) {
+        n = n / 1024;
+      }
+      el.innerHTML = n.toFixed(n < 10 && l > 0 ? 1 : 0) + " " + units[l];
+    }
+  };
+
+  function handleDragOver(event) {
+    event.preventDefault();
+  }
+
+  // dropzone allow to remove the uploaded file
+  function handleRemoveAll() {
+    if ($form.photo) $form.photo = "";
+    files.accepted = [];
+  }
+  function handleRemovePdf() {
+    console.log("remoiv");
+
+    if ($form.pdf) $form.pdf = "";
+    pdffiles.accepted = [];
+  }
+
+  // pdf uploader
+
+  function handlePdfFiles(e) {
+    const { acceptedFiles, fileRejections } = e.detail;
+    pdffiles.accepted = [...files.accepted, ...acceptedFiles];
+    pdffiles.rejected = [...files.rejected, ...fileRejections];
+    console.log("pdffiles.accepted", pdffiles.accepted[0].size);
+    if (pdffiles.accepted && pdffiles.accepted[0].size > 2000000) {
+      handleRemoveAll();
+      toast.error("pdf size should be less than 2MB");
+    }
+  }
 </script>
 
 <main>
@@ -233,6 +337,67 @@
                     </h3>
 
                     <div class="mt-2">
+                      <label
+                        for="email"
+                        class="block text-sm font-medium leading-6 text-gray-900"
+                        >Profile Image</label
+                      >
+                      {#if files.accepted.length === 0}
+                        <Dropzone
+                          on:drop={handleFilesSelect}
+                          on:dragover={handleDragOver}
+                          accept="image/png,image/jpg,image/jpeg"
+                          bind:input={temp.file}
+                        />
+                      {:else}
+                        <div class="dropzone">
+                          <div class="flex flex-col justify-center my-2 w-full">
+                            <div
+                              class="flex w-full items-center justify-between space-x-2"
+                            >
+                              <div
+                                class="flex flex-col w-full space-y-1 justify-center"
+                              >
+                                <img
+                                  src={selectedImage}
+                                  class="lg:w-[81px] rounded-full object-cover lg:h-[81px] w-[64px] h-[64px]"
+                                  alt=""
+                                />
+                              </div>
+                              <button
+                                class="text-red-700 no-underline button-strip"
+                                on:click={handleRemoveAll}
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      {/if}
+                      <ol class="text-indigo-500 text-sm">
+                        {#if files.accepted[0]}
+                          <div class="flex m-1 w-full text-xs text-gray-400">
+                            <ol>
+                              <li>File Name: {files.accepted[0].name}</li>
+                              <li>
+                                File Size: (<span
+                                  class="inline-block"
+                                  use:bytesCkeck>{files.accepted[0].size}</span
+                                >)
+                              </li>
+                              <li>File Type: {files.accepted[0].type}</li>
+                            </ol>
+                          </div>
+                          <!-- {#each files.accepted as item}
+                              <li>name:{item.name}</li>
+                              <li>size:{item.size.toFixed(2) / 1024}</li>
+                              <li>type:{item.type}</li>
+                            {/each} -->
+                        {/if}
+                      </ol>
+                    </div>
+
+                    <div class="mt-2">
                       <div>
                         <label
                           for="email"
@@ -242,7 +407,7 @@
 
                         <div class="relative mt-2 rounded-md shadow-sm">
                           <div
-                            class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"
+                            class="pointer-events-none absolute mt-2 left-0 flex items-center pl-3"
                           >
                             <svg
                               class="h-5 w-5 text-gray-400"
@@ -297,6 +462,47 @@
                           {/if}
                         </div>
                       </div>
+                      <div class="mt-2">
+                        <label
+                          for="email"
+                          class="block text-sm font-medium leading-6 text-gray-900"
+                          >Choose your favourite color</label
+                        >
+                        <ColorPicker bind:hex label="" />{hex}
+                      </div>
+
+                      <!-- pdf upload -->
+                      <div class="mt-2">
+                        <label
+                          for="email"
+                          class="block text-sm font-medium leading-6 text-gray-900"
+                          >Resume Upload (only pdf)</label
+                        >
+                        {#if pdffiles.accepted.length === 0}
+                          <Dropzone
+                            on:drop={handlePdfFiles}
+                            accept="application/pdf"
+                          />
+                        {:else}
+                          <ol>
+                            {#each pdffiles.accepted as items}
+                              <li class="flex justify-between">
+                                <div class="text-sm text-indigo-600">
+                                  {items.name}
+                                </div>
+                                <div class="">
+                                  <button
+                                    class="text-red-700 no-underline button-strip"
+                                    on:click={handleRemovePdf}
+                                  >
+                                    Remove
+                                  </button>
+                                </div>
+                              </li>
+                            {/each}
+                          </ol>
+                        {/if}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -324,3 +530,22 @@
     </div>
   {/if}
 </main>
+
+<style>
+  :global(.label.svelte-2ybi8r) {
+    /* display: flex !important; */
+    align-items: start !important;
+    gap: 0px !important;
+    cursor: pointer !important;
+    border-radius: 3px !important;
+    /* margin: 4px !important; */
+  }
+
+  :global(.container.svelte-2ybi8r) {
+    position: relative !important;
+    display: block !important;
+    display: flex !important;
+    align-items: start !important;
+    /* justify-content: center; */
+  }
+</style>
