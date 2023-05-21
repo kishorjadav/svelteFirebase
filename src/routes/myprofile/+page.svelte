@@ -156,7 +156,7 @@
                 <label
                   for="first-name"
                   class="block text-sm font-medium leading-6 text-gray-900"
-                  >Device ID</label
+                  >IP Address</label
                 >
                 <div class="mt-2">
                   <input
@@ -175,7 +175,7 @@
           <div
             class="flex items-center justify-end gap-x-6 border-t border-gray-900/10 px-4 py-4 sm:px-8"
           >
-            <div class="">
+            <!-- <div class="">
               <button
                 type="button"
                 class="text-sm font-semibold leading-6 text-gray-900"
@@ -186,7 +186,7 @@
                 class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                 >Save</button
               >
-            </div>
+            </div> -->
           </div>
         </form>
       </div>
