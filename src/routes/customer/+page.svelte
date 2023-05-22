@@ -232,7 +232,7 @@
         <div class="px-4 sm:px-6 lg:px-8">
           <div class="sm:flex justify-between w-full p-5">
             <div class="sm:flex">
-              <h1 class="text-base font-semibold leading-6 text-white">
+              <h1 class="text-base font-semibold leading-6 text-white text">
                 Customers
               </h1>
             </div>
