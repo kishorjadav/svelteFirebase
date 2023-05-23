@@ -84,7 +84,7 @@
             }   h-full `}
           >
             <slot />
-            {$authUserStore.currentUser}
+            <!-- {$authUserStore.currentUser} -->
           </div>
         </AuthSidebar>
       </section>
