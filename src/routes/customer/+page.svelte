@@ -20,6 +20,11 @@
   import { useAxios } from "../../services/useAxios";
   import { createForm } from "svelte-forms-lib";
   import { customerSchema } from "../../schemas/customValidation";
+  import Select from "svelte-select";
+  import CountyCode from "./countryCode.json";
+  import SveltyPicker from "svelty-picker";
+
+  // import DatePicker from "../../lib/components/UI/DatePicker.svelte";
 
   import axios from "axios";
 
@@ -43,7 +48,13 @@
     color: "",
     photo: "",
     pdf: "",
+    country_code: "+65",
+    country_code_label: "",
+    phone: "",
+    sdate: "",
+    edate: "",
   };
+  let collectionss = CountyCode;
 
   let hex; // or hsv or hex
 
@@ -469,6 +480,74 @@
                           >Choose your favourite color</label
                         >
                         <ColorPicker bind:hex label="" />{hex}
+                      </div>
+
+                      <section class="mt-2">
+                        <label for="mobile" class="label">
+                          Mobile Number <span class="text-orange-pmk">*</span>
+                        </label><br />
+                        <div class="flex gap-2">
+                          <div class="w-40">
+                            <Select
+                              class="country-code"
+                              items={collectionss}
+                              value={$form.country_code}
+                              on:change={(e) => {
+                                $form.country_code = e.detail.value;
+                                $form.country_code_label = e.detail.iso;
+                              }}
+                            />
+                          </div>
+                          <div class="w-full">
+                            <input
+                              type="text"
+                              class={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6`}
+                              placeholder="Enter your number"
+                              name="phone"
+                              id="phone"
+                              bind:value={$form.phone}
+                              on:change={handleChange}
+                              on:blur={handleChange}
+                            />
+                            {#if $errors.phone}
+                              <small class="text-red-600">{$errors.phone}</small
+                              >
+                            {/if}
+                          </div>
+                        </div>
+                      </section>
+
+                      <div class="flex justify-between">
+                        <div class="mt-4 w-full mx-1">
+                          <label for="mobile" class="label">
+                            Start Date <span class="text-orange-pmk">*</span>
+                          </label><br />
+                          <SveltyPicker
+                            inputClasses="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                            format="dd-mm-yyyy "
+                            bind:value={$form.sdate}
+                            on:change={handleChange}
+                            on:blur={handleChange}
+                          />
+                          {#if $errors.sdate}
+                            <small class="text-red-600">{$errors.sdate}</small>
+                          {/if}
+                        </div>
+                        <div class="mt-4 w-full mx-1">
+                          <label for="mobile" class="label">
+                            End Date <span class="text-orange-pmk">*</span>
+                          </label><br />
+                          <SveltyPicker
+                            inputClasses="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                            format="dd-mm-yyyy "
+                            bind:value={$form.edate}
+                            on:change={handleChange}
+                            on:blur={handleChange}
+                          />
+                          {#if $errors.edate}
+                            <small class="text-red-600">{$errors.edate}</small>
+                          {/if}
+                        </div>
                       </div>
 
                       <!-- pdf upload -->

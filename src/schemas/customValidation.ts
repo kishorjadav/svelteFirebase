@@ -59,4 +59,11 @@ export const ResetPasswordSchema = yup.object().shape({
 export const customerSchema = yup.object().shape({
     email: yup.string().email().label('Email').required(),
     firstName: yup.string().label('First Name').required(),
+    phone: yup
+        .number()
+        .typeError('Please enter a valid mobile number')
+        .label('Mobile Number')
+        .required(),
+    sdate: yup.string().label('Start date').required(),
+    edate: yup.string().label('End date').required(),
 });
