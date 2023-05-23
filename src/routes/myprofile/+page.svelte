@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { getCookie } from "../../cookies/useCookies";
 
   import { useToast } from "../../lib/toastify/toastify";
   import { useAxios } from "../../services/useAxios";
@@ -11,6 +12,7 @@
   import axios from "axios";
 
   import { accessStore } from "../../cookies/cookieStore";
+  import { reload } from "firebase/auth";
 
   const toast = useToast();
   // const fetch = useAxios();
@@ -21,16 +23,27 @@
     email: "",
     localId: "",
     photo: "",
+    userAgent: "",
+    vendor: "",
+    platform: "",
+    language: "",
   };
 
   // fecth data on load
   onMount(async () => {
-    fetchData();
+    if ($accessStore) {
+      fetchData();
+      fields.userAgent = navigator.userAgent;
+      fields.vendor = navigator.vendor;
+      fields.platform = navigator.platform;
+      fields.language = navigator.language;
+    }
   });
 
   // fetch data
   $: fetchData = async () => {
     try {
+      // location.reload();
       const res = await axios.post(
         "https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=AIzaSyDK0R6x-4ai29YULdMaXOL78DeJP5iPwtA",
         {
@@ -168,6 +181,50 @@
                     autocomplete="given-name"
                     class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                   />
+                </div>
+              </div>
+
+              <div class="sm:col-span-full">
+                <label
+                  for="first-name"
+                  class="block text-sm font-medium leading-6 text-gray-900"
+                  >User Agent</label
+                >
+                <div class="mt-2">
+                  {fields.userAgent}
+                </div>
+              </div>
+
+              <div class="sm:col-span-full">
+                <label
+                  for="first-name"
+                  class="block text-sm font-medium leading-6 text-gray-900"
+                  >Vendor</label
+                >
+                <div class="mt-2">
+                  {fields.vendor}
+                </div>
+              </div>
+
+              <div class="sm:col-span-full">
+                <label
+                  for="first-name"
+                  class="block text-sm font-medium leading-6 text-gray-900"
+                  >Platform</label
+                >
+                <div class="mt-2">
+                  {fields.platform}
+                </div>
+              </div>
+
+              <div class="sm:col-span-full">
+                <label
+                  for="first-name"
+                  class="block text-sm font-medium leading-6 text-gray-900"
+                  >Language</label
+                >
+                <div class="mt-2">
+                  {fields.language}
                 </div>
               </div>
             </div>
