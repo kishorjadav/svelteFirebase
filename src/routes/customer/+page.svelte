@@ -23,6 +23,7 @@
   import Select from "svelte-select";
   import CountyCode from "./countryCode.json";
   import SveltyPicker from "svelty-picker";
+  import Tags from "../../lib/components/forms/tags.svelte";
 
   // import DatePicker from "../../lib/components/UI/DatePicker.svelte";
 
@@ -51,8 +52,9 @@
     country_code: "+65",
     country_code_label: "",
     phone: "",
-    sdate: "",
+    sdate: "    ",
     edate: "",
+    tags: "",
   };
   let collectionss = CountyCode;
 
@@ -72,6 +74,7 @@
 
   let temp = "";
   let selectedImage = null;
+  let value;
 
   onMount(async () => {
     fetchData();
@@ -117,11 +120,12 @@
       onSubmit: async (values) => {
         try {
           // Add a new document with a generated id
-          console.log("auth", db);
+          console.log("auth", values);
 
           // later...
           console.log(values, (values.color = hex));
         } catch (e) {
+          console.log("auth", values);
           toast.error("error");
           console.log("error", e.response.data.error.message);
         }
@@ -226,13 +230,13 @@
 </script>
 
 <main>
-  <div class="bg-gray-800 rounded-lg">
+  <div class="bg-gray-100 rounded-lg">
     <div class=" max-w-full">
-      <div class="bg-gray-800 rounded-lg py-10">
+      <div class="bg-gray-100 rounded-lg py-10 border border-gray-800">
         <div class="px-4 sm:px-6 lg:px-8">
           <div class="sm:flex justify-between w-full p-5">
             <div class="sm:flex">
-              <h1 class="text-base font-semibold leading-6 text-white text">
+              <h1 class="text-base font-semibold leading-6 text-gray-800">
                 Customers
               </h1>
             </div>
@@ -255,22 +259,22 @@
                     <tr>
                       <th
                         scope="col"
-                        class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-white sm:pl-0"
+                        class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-800 sm:pl-0"
                         >Name</th
                       >
                       <th
                         scope="col"
-                        class="px-3 py-3.5 text-left text-sm font-semibold text-white"
+                        class="px-3 py-3.5 text-left text-sm font-semibold text-gray-800"
                         >Title</th
                       >
                       <th
                         scope="col"
-                        class="px-3 py-3.5 text-left text-sm font-semibold text-white"
+                        class="px-3 py-3.5 text-left text-sm font-semibold text-gray-800"
                         >Email</th
                       >
                       <th
                         scope="col"
-                        class="px-3 py-3.5 text-left text-sm font-semibold text-white"
+                        class="px-3 py-3.5 text-left text-sm font-semibold text-gray-800"
                         >Role</th
                       >
                       <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
@@ -281,23 +285,23 @@
                   <tbody class="divide-y divide-gray-800">
                     <tr>
                       <td
-                        class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-white sm:pl-0"
+                        class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-800 sm:pl-0"
                         >Lindsay Walton</td
                       >
                       <td
-                        class="whitespace-nowrap px-3 py-4 text-sm text-gray-300"
+                        class="whitespace-nowrap px-3 py-4 text-sm text-gray-800"
                         >Front-end Developer</td
                       >
                       <td
-                        class="whitespace-nowrap px-3 py-4 text-sm text-gray-300"
+                        class="whitespace-nowrap px-3 py-4 text-sm text-gray-800"
                         >lindsay.walton@example.com</td
                       >
                       <td
-                        class="whitespace-nowrap px-3 py-4 text-sm text-gray-300"
+                        class="whitespace-nowrap px-3 py-4 text-sm text-gray-800"
                         >Member</td
                       >
                       <td
-                        class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
+                        class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0 hidden"
                       >
                         <a
                           href="#"
@@ -473,6 +477,7 @@
                           {/if}
                         </div>
                       </div>
+
                       <div class="mt-2">
                         <label
                           for="email"
@@ -480,6 +485,51 @@
                           >Choose your favourite color</label
                         >
                         <ColorPicker bind:hex label="" />{hex}
+                      </div>
+
+                      <div class="mt-2">
+                        <label
+                          for="email"
+                          class="block text-sm font-medium leading-6 text-gray-900 mb-4"
+                          >Hobbies</label
+                        >
+                        <Tags id="lang" value={["ES", "RU"]}>
+                          <option value="cooking">Cooking</option>
+                          <option value="reading">Reading</option>
+                          <option value="sleeping">Sleeping</option>
+                          <option value="watching">Watching Tv</option>
+                        </Tags>
+                      </div>
+
+                      <div class="flex justify-between">
+                        <div class="mt-4 w-full mx-1">
+                          <label for="mobile" class="label">
+                            Start Date <span class="text-orange-pmk">*</span>
+                          </label><br />
+                          <SveltyPicker
+                            inputClasses="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                            format="dd-mm-yyyy"
+                            bind:value={$form.sdate}
+                            name="sdate"
+                          />
+                          {#if $errors.sdate}
+                            <small class="text-red-600">{$errors.sdate}</small>
+                          {/if}
+                        </div>
+                        <div class="mt-4 w-full mx-1">
+                          <label for="mobile" class="label">
+                            End Date <span class="text-orange-pmk">*</span>
+                          </label><br />
+                          <SveltyPicker
+                            inputClasses="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                            format="dd-mm-yyyy"
+                            bind:value={$form.edate}
+                            name="edate"
+                          />
+                          {#if $errors.edate}
+                            <small class="text-red-600">{$errors.edate}</small>
+                          {/if}
+                        </div>
                       </div>
 
                       <section class="mt-2">
@@ -516,39 +566,6 @@
                           </div>
                         </div>
                       </section>
-
-                      <div class="flex justify-between">
-                        <div class="mt-4 w-full mx-1">
-                          <label for="mobile" class="label">
-                            Start Date <span class="text-orange-pmk">*</span>
-                          </label><br />
-                          <SveltyPicker
-                            inputClasses="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                            format="dd-mm-yyyy "
-                            bind:value={$form.sdate}
-                            on:change={handleChange}
-                            on:blur={handleChange}
-                          />
-                          {#if $errors.sdate}
-                            <small class="text-red-600">{$errors.sdate}</small>
-                          {/if}
-                        </div>
-                        <div class="mt-4 w-full mx-1">
-                          <label for="mobile" class="label">
-                            End Date <span class="text-orange-pmk">*</span>
-                          </label><br />
-                          <SveltyPicker
-                            inputClasses="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                            format="dd-mm-yyyy "
-                            bind:value={$form.edate}
-                            on:change={handleChange}
-                            on:blur={handleChange}
-                          />
-                          {#if $errors.edate}
-                            <small class="text-red-600">{$errors.edate}</small>
-                          {/if}
-                        </div>
-                      </div>
 
                       <!-- pdf upload -->
                       <div class="mt-2">
