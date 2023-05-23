@@ -195,7 +195,7 @@
     background-color: white;
     border-bottom: 1px solid hsl(0, 0%, 70%);
     position: relative;
-    z-index: 50;
+    z-index: 1;
   }
   .multiselect:not(.readonly):hover {
     border-bottom-color: hsl(0, 0%, 50%);
