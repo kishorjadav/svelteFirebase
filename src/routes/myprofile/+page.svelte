@@ -5,7 +5,7 @@
   import { useToast } from "../../lib/toastify/toastify";
   import { useAxios } from "../../services/useAxios";
   import { createForm } from "svelte-forms-lib";
-  import { ResetPasswordSchema } from "../../schemas/customValidation";
+  import { UserSchema } from "../../schemas/customValidation";
   import PasswordReset from "./PasswordReset.svelte";
   import EmailUpdate from "./EmailUpdate.svelte";
 
@@ -14,10 +14,20 @@
   import { accessStore } from "../../cookies/cookieStore";
   import { reload } from "firebase/auth";
 
+  import { db } from "../../lib/firebase/firebase.client";
+
+  import { doc, setDoc, onSnapshot, getDoc } from "firebase/firestore";
+
   const toast = useToast();
   // const fetch = useAxios();
 
   let result: any;
+
+  $: userData = {
+    fname: "",
+    lname: "",
+    userId: "",
+  };
 
   let fields = {
     email: "",
@@ -43,7 +53,6 @@
   // fetch data
   $: fetchData = async () => {
     try {
-      // location.reload();
       const res = await axios.post(
         "https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=AIzaSyDK0R6x-4ai29YULdMaXOL78DeJP5iPwtA",
         {
@@ -54,7 +63,10 @@
 
       fields.email = result.map((item) => item.email);
       fields.localId = "103.5.132.29";
-      console.log("fleids checkinf", fields.email);
+      userData.userId = result.map((item) => item.localId);
+      console.log("fleids checkinf", result);
+
+      getUser();
     } catch (e) {
       // let error = e.response;
       // if (error.status >= 400 && error.status <= 499) {
@@ -67,6 +79,55 @@
       // }
     }
   };
+  const getUser = async () => {
+    console.log("get user");
+    const docRef = doc(db, "users", userData.userId[0]);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      userData.fname = docSnap.data().fname;
+      userData.lname = docSnap.data().lname;
+
+      console.log("Document data:", docSnap.data());
+    } else {
+      // docSnap.data() will be undefined in this case
+      console.log("No such document!");
+    }
+    // const docRef = doc(db, "users", userData.userId);
+    // const docSnap = await getDoc(docRef);
+
+    // if (docSnap.exists()) {
+    //   console.log("Document data:", docSnap.data());
+    // } else {
+    //   // docSnap.data() will be undefined in this case
+    //   console.log("No such document!");
+    // }
+  };
+  $: console.log(userData.fname, userData.lname);
+
+  //to add new user name
+  const { form, errors, state, handleChange, handleSubmit, handleReset } =
+    createForm({
+      initialValues: "",
+      validationSchema: UserSchema,
+      onSubmit: async (values) => {
+        try {
+          console.log("submited values", values);
+
+          // Add a new document with a generated id
+          await setDoc(doc(db, "users", userData.userId[0]), {
+            fname: values.fname,
+            lname: values.lname,
+            userId: userData.userId[0],
+          });
+          toast.error("Successfully Added");
+          console.log("auth", values, userData.userId);
+        } catch (e) {
+          console.log("auth", values);
+          toast.error("error");
+        }
+      },
+    });
 </script>
 
 <main class="mb-40">
@@ -84,13 +145,14 @@
         </div>
 
         <form
+          on:submit={handleSubmit}
           class="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl md:col-span-2"
         >
           <div class="px-4 py-6 sm:p-8">
             <div
               class="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6"
             >
-              <div class="col-span-full">
+              <!-- <div class="col-span-full">
                 <label
                   for="photo"
                   class="block text-sm font-medium leading-6 text-gray-900"
@@ -110,7 +172,7 @@
                     />
                   </svg>
                 </div>
-              </div>
+              </div> -->
               <div class="sm:col-span-3">
                 <label
                   for="first-name"
@@ -119,13 +181,18 @@
                 >
                 <div class="mt-2">
                   <input
-                    readonly
                     type="text"
-                    name="firstname"
-                    id="firstname"
+                    name="fname"
+                    id="fname"
+                    bind:value={userData.fname}
+                    on:change={handleChange}
+                    on:blur={handleChange}
                     autocomplete="given-name"
                     class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                   />
+                  {#if $errors.fname}
+                    <small class="text-red-600">{$errors.fname}</small>
+                  {/if}
                 </div>
               </div>
               <div class="sm:col-span-3">
@@ -136,13 +203,19 @@
                 >
                 <div class="mt-2">
                   <input
-                    readonly
                     type="text"
-                    name="lastname"
-                    id="lastname"
+                    name="lname"
+                    id="lname"
+                    bind:value={userData.lname}
+                    on:change={handleChange}
+                    on:change={handleChange}
+                    on:blur={handleChange}
                     autocomplete="given-name"
                     class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                   />
+                  {#if $errors.lname}
+                    <small class="text-red-600">{$errors.lname}</small>
+                  {/if}
                 </div>
               </div>
 
@@ -153,15 +226,7 @@
                   >Email</label
                 >
                 <div class="mt-2">
-                  <input
-                    readonly
-                    type="email"
-                    name="email"
-                    id="email"
-                    bind:value={fields.email}
-                    autocomplete="given-name"
-                    class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                  />
+                  {fields.email}
                 </div>
               </div>
 
@@ -172,15 +237,7 @@
                   >IP Address</label
                 >
                 <div class="mt-2">
-                  <input
-                    readonly
-                    type="type"
-                    name="email"
-                    id="email"
-                    bind:value={fields.localId}
-                    autocomplete="given-name"
-                    class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                  />
+                  {fields.localId}
                 </div>
               </div>
 
@@ -232,18 +289,19 @@
           <div
             class="flex items-center justify-end gap-x-6 border-t border-gray-900/10 px-4 py-4 sm:px-8"
           >
-            <!-- <div class="">
-              <button
+            <div class="">
+              <!-- <button
                 type="button"
                 class="text-sm font-semibold leading-6 text-gray-900"
                 >Cancel</button
-              >
+              > -->
               <button
                 type="submit"
+                on:click={handleSubmit}
                 class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                 >Save</button
               >
-            </div> -->
+            </div>
           </div>
         </form>
       </div>
