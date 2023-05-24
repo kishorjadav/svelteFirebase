@@ -64,11 +64,17 @@ export const customerSchema = yup.object().shape({
         .typeError('Please enter a valid mobile number')
         .label('Mobile Number')
         .required(),
-    // sdate: yup.string().label('Start date').required(),
-    // edate: yup.string().label('End date').required(),
-    sdate: yup.date().label('Start date').required(),
-    edate: yup
-        .date()
+    sdate: yup.string().label('Start date').required(),
+    edate: yup.string().label('End date').required(),
+    // sdate: yup.date().label('Start date').required(),
+    // edate: yup
+    //     .date()
+    //     .min(yup.ref('sdate'), 'End date cannot be earlier than start date').required(),
+});
 
-        .min(yup.ref('sdate'), 'End date cannot be earlier than start date').required(),
+
+
+export const UserSchema = yup.object().shape({
+    fname: yup.string().label('First Name').required(),
+    lname: yup.string().label('Last Name').required(),
 });
