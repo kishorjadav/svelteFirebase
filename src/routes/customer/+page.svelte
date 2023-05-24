@@ -2,11 +2,16 @@
   import { db } from "../../lib/firebase/firebase.client";
   import {
     collection,
-    query,
-    where,
+    doc,
+    setDoc,
+    getDoc,
     onSnapshot,
     getDocs,
   } from "firebase/firestore";
+
+  import { getDatabase, ref, set, onValue } from "firebase/database";
+  import { authUserStore } from "../../store";
+
   import { browser } from "$app/environment";
 
   import { onMount } from "svelte";
@@ -39,6 +44,7 @@
   // let cors = require("cors");
 
   let result: any;
+  let users: any = [];
   // pop ups
 
   $: addCustomerPopup = false;
@@ -54,7 +60,7 @@
     phone: "",
     sdate: "    ",
     edate: "",
-    tags: "",
+    tags: [],
   };
   let collectionss = CountyCode;
 
@@ -74,6 +80,7 @@
 
   let temp = "";
   let selectedImage = null;
+  let selectedPdf = null;
   let value;
 
   onMount(async () => {
@@ -92,6 +99,15 @@
   // fetch data
   $: fetchData = async () => {
     try {
+      const colRef = collection(db, "customerCollection");
+      const docsSnap = await getDocs(colRef);
+      console.log("docsSnap", docsSnap.docChanges());
+
+      docsSnap.forEach((doc) => {
+        users = doc.data();
+        console.log("users", users);
+      });
+
       // const res = await axios.post(
       //   "https://api.ipify.org/?format=json",
       //   {
@@ -99,6 +115,7 @@
       //   },
       //   config
       // );
+
       // result = res;
       // console.log("sfsffs", result);
       // https://api.ipify.org/?format=json
@@ -112,25 +129,6 @@
       console.log("error");
     }
   };
-  //to add new customer
-  const { form, errors, state, handleChange, handleSubmit, handleReset } =
-    createForm({
-      initialValues: fields,
-      validationSchema: customerSchema,
-      onSubmit: async (values) => {
-        try {
-          // Add a new document with a generated id
-          console.log("auth", values);
-
-          // later...
-          console.log(values, (values.color = hex));
-        } catch (e) {
-          console.log("auth", values);
-          toast.error("error");
-          console.log("error", e.response.data.error.message);
-        }
-      },
-    });
 
   const addCustomer = async () => {
     addCustomerPopup = true;
@@ -157,6 +155,7 @@
       e.preventDefault();
       const imgfile = e.detail.acceptedFiles[0];
       const reader = new FileReader();
+      console.log("path", imgfile);
 
       reader.onload = () => {
         selectedImage = reader.result;
@@ -221,12 +220,54 @@
     const { acceptedFiles, fileRejections } = e.detail;
     pdffiles.accepted = [...files.accepted, ...acceptedFiles];
     pdffiles.rejected = [...files.rejected, ...fileRejections];
-    console.log("pdffiles.accepted", pdffiles.accepted[0].size);
+    selectedPdf = pdffiles.accepted[0].path;
+    // console.log("pdffiles.accepted", pdffiles.accepted[0].path);
     if (pdffiles.accepted && pdffiles.accepted[0].size > 2000000) {
       handleRemoveAll();
       toast.error("pdf size should be less than 2MB");
     }
   }
+
+  //to add new customer
+  const { form, errors, state, handleChange, handleSubmit, handleReset } =
+    createForm({
+      initialValues: fields,
+      validationSchema: customerSchema,
+      //customerSchema
+      onSubmit: async (values) => {
+        try {
+          // Add a new document with a generated id
+          // Add a new document with a generated id
+          console.log(values, $authUserStore.currentUser[0]);
+
+          await setDoc(
+            doc(db, "customerCollection", $authUserStore.currentUser[0]),
+            {
+              userId: $authUserStore.currentUser[0],
+              email: values.email,
+              firstName: values.firstName,
+              color: hex,
+              photo: selectedImage,
+              pdf: selectedPdf,
+              country_code: values.country_code,
+              phone: values.phone,
+              sdate: values.sdate,
+              edate: values.edate,
+              // tags: ["sellping", "eating"],
+            }
+          );
+          addCustomerPopup = false;
+          fetchData();
+          toast.error("Successfully Added");
+        } catch (e) {
+          toast.error("Error");
+
+          // console.log("auth", values);
+          // toast.error("error");
+          // console.log("error", e.response.data.error.message);
+        }
+      },
+    });
 </script>
 
 <main>
@@ -262,21 +303,37 @@
                         class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-800 sm:pl-0"
                         >Name</th
                       >
+
                       <th
                         scope="col"
-                        class="px-3 py-3.5 text-left text-sm font-semibold text-gray-800"
-                        >Title</th
-                      >
-                      <th
-                        scope="col"
-                        class="px-3 py-3.5 text-left text-sm font-semibold text-gray-800"
+                        class="px-0 py-3.5 text-left text-sm font-semibold text-gray-800"
                         >Email</th
                       >
                       <th
                         scope="col"
-                        class="px-3 py-3.5 text-left text-sm font-semibold text-gray-800"
-                        >Role</th
+                        class="px-0 py-3.5 text-left text-sm font-semibold text-gray-800"
+                        >Phone</th
                       >
+                      <th
+                        scope="col"
+                        class="px-0 py-3.5 text-left text-sm font-semibold text-gray-800"
+                        >color</th
+                      >
+                      <th
+                        scope="col"
+                        class="px-0 py-3.5 text-left text-sm font-semibold text-gray-800"
+                        >Start Date</th
+                      >
+                      <th
+                        scope="col"
+                        class="px-0 py-3.5 text-left text-sm font-semibold text-gray-800"
+                        >End Date</th
+                      >
+                      <!-- <th
+                        scope="col"
+                        class="px-3 py-3.5 text-left text-sm font-semibold text-gray-800"
+                        >Pdf</th
+                      > -->
                       <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
                         <span class="sr-only">Edit</span>
                       </th>
@@ -284,32 +341,39 @@
                   </thead>
                   <tbody class="divide-y divide-gray-800">
                     <tr>
-                      <td
-                        class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-800 sm:pl-0"
-                        >Lindsay Walton</td
-                      >
-                      <td
-                        class="whitespace-nowrap px-3 py-4 text-sm text-gray-800"
-                        >Front-end Developer</td
-                      >
-                      <td
-                        class="whitespace-nowrap px-3 py-4 text-sm text-gray-800"
-                        >lindsay.walton@example.com</td
-                      >
-                      <td
-                        class="whitespace-nowrap px-3 py-4 text-sm text-gray-800"
-                        >Member</td
-                      >
-                      <td
-                        class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0 hidden"
-                      >
-                        <a
-                          href="#"
-                          class="text-indigo-400 hover:text-indigo-300"
-                          >Edit<span class="sr-only">, Lindsay Walton</span></a
-                        >
+                      <td>
+                        {users.firstName}
                       </td>
+                      <td>
+                        {users.email}
+                      </td>
+                      <td>
+                        {users.country_code}
+                        {users.phone}
+                      </td>
+                      <td>
+                        {users.color}
+                      </td>
+                      <td>
+                        {users.sdate}
+                      </td>
+                      <td>
+                        {users.edate}
+                      </td>
+                      <!-- <td>
+                        <a href={users.pdf}> PDF </a>
+                      </td> -->
                     </tr>
+                    <tr />
+                    <tr>
+                      <!-- {#each Object.entries(users) as [key, value]}
+                        <td
+                          class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-800 sm:pl-0"
+                          >{value}</td
+                        ><br />
+                      {/each} -->
+                    </tr>
+                    <tr />
 
                     <!-- More people... -->
                   </tbody>
