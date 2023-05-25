@@ -52,6 +52,7 @@
 
   // fetch data
   $: fetchData = async () => {
+    
     try {
       const res = await axios.post(
         "https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=AIzaSyDK0R6x-4ai29YULdMaXOL78DeJP5iPwtA",
