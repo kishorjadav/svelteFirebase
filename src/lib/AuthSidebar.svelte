@@ -1,11 +1,14 @@
 <script>
   import { onMount } from "svelte";
-  import images from "../images/netflix-logo-png-2562.png";
+  import { getCookie } from "../cookies/useCookies";
+  import { THEME_COOKIE_NAME } from "../cookies/cookieName";
 
   let mini = true;
   let openSidebar;
   let closeSidebar;
   let sideBar;
+
+  $: mode = getCookie(THEME_COOKIE_NAME);
 
   onMount(() => {
     sideBar = document.getElementById("mobile-nav");
@@ -35,15 +38,18 @@
 
   <div id="mySidebar" class="flex flex-no-wrap">
     <div
-      class=" absolute sm:relative text-white {mini === true
-        ? 'bg-gray-800 w-16 hidden'
-        : 'bg-gray-800 w-64'} md:h-screen flex-col justify-between sm:flex"
+      class=" absolute sm:relative text-white {mode === 'light'
+        ? 'light'
+        : 'dark'} {mini === true
+        ? 'w-16 hidden'
+        : ' w-64'} md:h-screen flex-col justify-between sm:flex"
     >
       <div class="px-8">
         <div class="h-16 w-full flex items-center">
           <img
             class="pt-8"
             src="https://www.freepnglogos.com/uploads/netflix-logo-0.png"
+            alt="jgh"
           />
           <!-- <svg
             aria-label="Ripples. Logo"
@@ -135,7 +141,11 @@
         </ul>
       </div>
       <div class="px-8 border-t border-gray-700">
-        <ul class="w-full flex items-center justify-between bg-gray-800">
+        <ul
+          class="w-full flex items-center justify-between {mode === 'light'
+            ? 'light'
+            : 'dark'}"
+        >
           <li class="cursor-pointer text-white pt-5 pb-3">
             <button
               on:click={toggleSidebar}
