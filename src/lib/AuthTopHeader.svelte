@@ -1,11 +1,20 @@
 <script lang="ts">
-  import { getCookie, removeCookie } from "../cookies/useCookies";
+  import { getCookie, removeCookie, setCookie } from "../cookies/useCookies";
   import {
     AUTH_COOKIE_NAME,
     AUTH_REFRESH_COOKIE_NAME,
+    THEME_COOKIE_NAME,
   } from "../cookies/cookieName";
+  import { onMount } from "svelte";
+  import { reload } from "firebase/auth";
+  import { setModeStore } from "../store";
 
   export let accessToComp: string = "";
+
+  $: mode = getCookie(THEME_COOKIE_NAME);
+
+  // fecth data on load
+  onMount(async () => {});
 
   let logout = async () => {
     try {
@@ -16,10 +25,31 @@
       console.error("error", e);
     }
   };
+
+  const toggleTheme = async () => {
+    try {
+      if (mode === "light") {
+        setModeStore.update((curr) => {
+          return { ...curr, theme: "dark" };
+        });
+        setCookie(THEME_COOKIE_NAME, "dark");
+        location.reload();
+      } else {
+        setModeStore.update((curr) => {
+          return { ...curr, theme: "light" };
+        });
+        setCookie(THEME_COOKIE_NAME, "light");
+        location.reload();
+        console.log("dark cond", mode);
+      }
+    } catch (e) {
+      console.error("error", e);
+    }
+  };
 </script>
 
 {#if accessToComp}
-  <header class="bg-gray-800">
+  <header class={mode === "light" ? "light" : "dark"}>
     <nav
       class="mx-auto flex max-w-7xl items-center justify-between p-4"
       aria-label="Global"
@@ -27,11 +57,11 @@
       <div class="flex lg:flex-1">
         <a href="#" class="-m-1.5 p-1.5">
           <span class="sr-only">Your Company</span>
-          <img
+          <!-- <img
             class="h-8 w-auto"
             src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500"
             alt=""
-          />
+          /> -->
         </a>
       </div>
       <div class="flex lg:hidden">
@@ -57,32 +87,57 @@
         </button>
       </div>
       <div class="hidden lg:flex lg:gap-x-12">
-        <a href="#" class="text-sm font-semibold leading-6 text-white"
-          >Product</a
+        <a href="/" class="text-sm font-semibold leading-6 text-white"
+          >Dashboard</a
         >
-        <a href="#" class="text-sm font-semibold leading-6 text-white"
-          >Features</a
+        <a href="/myprofile" class="text-sm font-semibold leading-6 text-white"
+          >My Profile</a
         >
-        <a href="#" class="text-sm font-semibold leading-6 text-white"
-          >Marketplace</a
-        >
-        <a href="#" class="text-sm font-semibold leading-6 text-white"
-          >Company</a
+        <a href="/customer" class="text-sm font-semibold leading-6 text-white"
+          >Customers</a
         >
       </div>
-      <div class="hidden lg:flex lg:flex-1 lg:justify-end">
+      <div class="hidden lg:flex lg:flex-1 lg:justify-end mr-8">
+        {#if mode === "light"}
+          <svg
+            on:click={toggleTheme}
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="w-6 h-6 text-white"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"
+            />
+          </svg>
+        {:else}
+          <svg
+            on:click={toggleTheme}
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="w-6 h-6 text-white"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"
+            />
+          </svg>
+        {/if}
+      </div>
+      <div class="">
         <button
           on:click={() => logout()}
           class="text-sm font-semibold leading-6 text-white"
           >Log out<span aria-hidden="true">&rarr;</span></button
         >
-        <a href="/myprofile">
-          <img
-            class="inline-block h-14 w-14 rounded-full"
-            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-            alt=""
-          />
-        </a>
       </div>
     </nav>
 
