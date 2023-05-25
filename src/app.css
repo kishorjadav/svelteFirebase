@@ -1,3 +1,16 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* app.css */
+.dark {
+    /* Define your dark mode styles here */
+    background-color: #1f2937;
+    color: #ffffff;
+}
+
+.light {
+    /* Define your light mode styles here */
+    background-color: #0369a1;
+    color: #ffffff;
+}
