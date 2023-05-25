@@ -1,6 +1,5 @@
 <script>
   import { onMount } from "svelte";
-  import images from "../images/netflix-logo-png-2562.png";
   import { getCookie } from "../cookies/useCookies";
   import { THEME_COOKIE_NAME } from "../cookies/cookieName";
 
@@ -50,6 +49,7 @@
           <img
             class="pt-8"
             src="https://www.freepnglogos.com/uploads/netflix-logo-0.png"
+            alt="jgh"
           />
           <!-- <svg
             aria-label="Ripples. Logo"
@@ -181,5 +181,4 @@
       <slot />
     </div>
   </div>
-  
 </div>
