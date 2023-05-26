@@ -54,6 +54,7 @@
       authUserStore.update((curr) => {
         return { ...curr, isLoading: false, currentUser: fields.localId };
       });
+
       console.log("fleids checking", $authUserStore);
     } catch (e) {
       // let error = e.response;
