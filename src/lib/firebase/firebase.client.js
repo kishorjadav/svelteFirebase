@@ -4,7 +4,7 @@ import { deleteApp, getApp, getApps, initializeApp } from "firebase/app";
 // https://firebase.google.com/docs/web/setup#available-libraries
 import { getAuth, setPersistence, inMemoryPersistence } from "firebase/auth";
 
-// import { getFirestore } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
 import { getDatabase } from "firebase/database";
 import "firebase/firestore";
 
@@ -31,5 +31,5 @@ if (!getApps().length) {
 export const auth = getAuth(firebaseApp);
 
 // Initialize Cloud Firestore and get a reference to the service
-//export const db = getFirestore(firebaseApp);
-export const db = getDatabase(firebaseApp);
+export const db = getFirestore(firebaseApp);
+// export const db = getDatabase(firebaseApp);
