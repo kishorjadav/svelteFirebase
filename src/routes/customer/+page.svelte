@@ -451,6 +451,9 @@
                           <td>
                             {users.edate}
                           </td>
+                          <!-- <td>
+                            <a href={users.pdf}>pdf</a>
+                          </td> -->
 
                           <td>
                             <div class="" on:click={editCustomer(users.custId)}>

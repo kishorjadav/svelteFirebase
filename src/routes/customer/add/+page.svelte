@@ -43,6 +43,7 @@
   import ColorPicker from "svelte-awesome-color-picker";
   import Dropzone from "svelte-file-dropzone/Dropzone.svelte";
   import { set } from "firebase/database";
+  import { goto } from "$app/navigation";
 
   const toast = useToast();
   const fetch = useAxios();
@@ -85,6 +86,7 @@
     rejected: [],
   };
   let imgurl;
+  let pdfurl;
 
   let temp = "";
   let selectedImage = null;
@@ -205,7 +207,8 @@
     pdffiles.accepted = [...files.accepted, ...acceptedFiles];
     pdffiles.rejected = [...files.rejected, ...fileRejections];
     selectedPdf = pdffiles.accepted[0].path;
-    // console.log("pdffiles.accepted", pdffiles.accepted[0].path);
+    pdfurl = pdffiles.accepted[0];
+    console.log("pdffiles.accepted", pdffiles.accepted[0]);
     if (pdffiles.accepted && pdffiles.accepted[0].size > 2000000) {
       handleRemoveAll();
       toast.error("pdf size should be less than 2MB");
@@ -248,16 +251,15 @@
           //   );
 
           const storage = getStorage();
-          const storageRef = ref(storage, $authUserStore.currentUser[0]);
+          const imgRef = ref(storage, $authUserStore.currentUser[0]);
+          const pdfRef = ref(storage, $authUserStore.currentUser[0] + "pdf");
 
           // 'file' comes from the Blob or File API
-          let files = uploadBytes(storageRef, imgurl).then((snapshot) => {
-            console.log(
-              "Uploaded a blob or file!",
-              imgurl,
-              snapshot,
-              storageRef
-            );
+          let files = uploadBytes(imgRef, imgurl).then((snapshot) => {
+            console.log("Uploaded a blob or file!", imgurl, snapshot, imgRef);
+          });
+          let pdffiles = uploadBytes(pdfRef, pdfurl).then((snapshot) => {
+            console.log("Uploaded a blob or file!", pdfurl, snapshot, imgRef);
           });
           // Upload completed successfully, now we can get the download URL
           //   getDownloadURL(files).then((downloadURL) => {
@@ -271,9 +273,10 @@
                 {
                   email: values.email,
                   firstName: values.firstName,
+                  lastName: values.lastName,
                   color: hex,
                   photo: `https://firebasestorage.googleapis.com/v0/b/sveltekit-auth-39155.appspot.com/o/${$authUserStore.currentUser[0]}?alt=media&token=bb73397c-94d6-49c1-a862-6c6ea9fa204d`,
-                  pdf: selectedPdf,
+                  pdf: `https://firebasestorage.googleapis.com/v0/b/sveltekit-auth-39155.appspot.com/o/${$authUserStore.currentUser[0]}pdf?alt=media&token=2b0de916-1f28-4d1f-9a83-4dec6701f58f`,
                   country_code: values.country_code,
                   phone: values.phone,
                   sdate: values.sdate,
@@ -284,6 +287,7 @@
               ],
             }
           );
+          goto("/customer");
           addCustomerPopup = false;
           editCustomerPopup = false;
           fetchData();
@@ -293,28 +297,6 @@
         }
       },
     });
-
-  const deleteCustomer = async (custId) => {
-    try {
-      console.log("delete", custId);
-
-      const custRef = doc(
-        db,
-        "customerCollection",
-        $authUserStore.currentUser[0]
-      );
-
-      // Remove the 'capital' field from the document
-      await updateDoc(custRef, {
-        customers: deleteField(custId),
-      });
-
-      fetchData();
-      toast.error("Successfully deleted");
-    } catch {
-      toast.error("Error");
-    }
-  };
 </script>
 
 <main>
@@ -582,10 +564,13 @@
                 <Dropzone on:drop={handlePdfFiles} accept="application/pdf" />
               {:else}
                 <ol>
-                  {#each pdffiles.accepted as items}
+                  {#if pdffiles.accepted[1].path || pdffiles.accepted[0].path}
+                    {pdffiles.accepted[1].path}
+                  {/if}
+                  <!-- {#each pdffiles.accepted as itemss}
                     <li class="flex justify-between">
                       <div class="text-sm text-indigo-600">
-                        {items.name}
+                        {itemss.name}
                       </div>
                       <div class="">
                         <button
@@ -596,7 +581,7 @@
                         </button>
                       </div>
                     </li>
-                  {/each}
+                  {/each} -->
                 </ol>
               {/if}
             </div>
