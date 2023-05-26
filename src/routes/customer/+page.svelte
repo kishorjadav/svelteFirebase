@@ -56,6 +56,7 @@
   let fields = {
     email: "",
     firstName: "",
+    lastName: "",
     color: "",
     photo: "",
     pdf: "",
@@ -351,23 +352,23 @@
     <div class=" max-w-full">
       <div class="bg-gray-100 rounded-lg py-10 border border-gray-800">
         <div class="px-4 sm:px-6 lg:px-8">
-          <div class="sm:flex justify-between w-full p-5">
+          <div class="sm:flex justify-between w-full py-5">
             <div class="sm:flex">
               <h1 class="text-base font-semibold leading-6 text-gray-800">
                 Customers
               </h1>
             </div>
             <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-              <button
-                on:click={addCustomer}
+              <a
+                href="/customer/add"
                 type="button"
                 class="block rounded-md bg-indigo-500 px-3 py-2 text-center text-sm font-semibold text-white hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
-                >Add customer</button
+                >Add customer</a
               >
             </div>
           </div>
           <div class="mt-8 flow-root">
-            <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+            <div class="-mx-4 -my-2 overflow-x-auto">
               <div
                 class="inline-block w-full py-2 align-middle sm:px-6 lg:px-5"
               >
@@ -420,7 +421,19 @@
                       {#each Object.entries(getAllCustomers) as [key, users]}
                         <tr>
                           <td>
-                            {users.firstName}
+                            <div class="flex items-center gap-x-4">
+                              <img
+                                src={users.photo}
+                                alt=""
+                                class="h-8 w-8 rounded-full bg-gray-800"
+                              />
+                              <div
+                                class="truncate text-sm font-medium leading-6 text-black"
+                              >
+                                {users.firstName}
+                                {users.lastName}
+                              </div>
+                            </div>
                           </td>
                           <td>
                             {users.email}
@@ -624,6 +637,7 @@
                           {/if}
                         </div>
                       </div>
+
                       <div class="mt-2">
                         <label
                           for="email"
