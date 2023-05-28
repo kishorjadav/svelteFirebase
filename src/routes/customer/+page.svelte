@@ -406,6 +406,11 @@
                         class="px-0 py-3.5 text-left text-sm font-semibold text-gray-800"
                         >End Date</th
                       >
+                      <th
+                        scope="col"
+                        class="px-0 py-3.5 text-left text-sm font-semibold text-gray-800"
+                        >Hobbies</th
+                      >
                       <!-- <th
                         scope="col"
                         class="px-3 py-3.5 text-left text-sm font-semibold text-gray-800"
@@ -451,11 +456,14 @@
                           <td>
                             {users.edate}
                           </td>
+                          <td>
+                            {users.tags}
+                          </td>
                           <!-- <td>
                             <a href={users.pdf}>pdf</a>
                           </td> -->
 
-                          <td>
+                          <!-- <td>
                             <div class="" on:click={editCustomer(users.custId)}>
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -472,7 +480,7 @@
                                 />
                               </svg>
                             </div>
-                          </td>
+                          </td> -->
 
                           <td>
                             <div

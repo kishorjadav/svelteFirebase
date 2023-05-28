@@ -283,7 +283,6 @@
                   edate: values.edate,
                   userId: $authUserStore.currentUser[0],
                   custId: Math.floor(Math.random() * 100 + 1),
-                  tags: ["cooking", "reading"],
                 },
               ],
             }
@@ -305,7 +304,7 @@
     <div class="grid grid-cols-1 gap-x-8 gap-y-8 md:grid-cols-3">
       <div class="px-4 sm:px-0">
         <h2 class="text-base font-semibold leading-7 text-gray-900">
-          Add Customer
+          Update Customer
         </h2>
         <p class="mt-1 text-sm leading-6 text-gray-600">
           This information will not be displayed publicy.
@@ -600,7 +599,7 @@
             type="submit"
             on:click={handleSubmit}
             class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            >Save</button
+            >Update</button
           >
         </div>
       </form>
