@@ -8,6 +8,8 @@
   import { UserSchema } from "../../schemas/customValidation";
   import PasswordReset from "./PasswordReset.svelte";
   import EmailUpdate from "./EmailUpdate.svelte";
+  import { getAuth, onAuthStateChanged, getIdToken } from "firebase/auth";
+  import { auth } from "../../lib/firebase/firebase.client";
 
   import axios from "axios";
 
@@ -53,6 +55,21 @@
   // fetch data
   $: fetchData = async () => {
     try {
+      // onAuthStateChanged(auth, (user) => {
+      //   console.log("userrr", auth);
+      //   if (user) {
+      //     // User is signed in, see docs for a list of available properties
+      //     // https://firebase.google.com/docs/reference/js/auth.user
+      //     const uid = user.uid;
+      //     console.log("userrr", auth);
+
+      //     // ...
+      //   } else {
+      //     // User is signed out
+      //     // ...
+      //   }
+      // });
+
       const res = await axios.post(
         "https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=AIzaSyDK0R6x-4ai29YULdMaXOL78DeJP5iPwtA",
         {
@@ -68,14 +85,14 @@
 
       getUser();
     } catch (e) {
-      // let error = e.response;
-      // if (error.status >= 400 && error.status <= 499) {
-      //   if (error.status === 403) {
-      //     hasPermission = false;
-      //   }
-      //   toast.error(
-      //     error.data.message || "Something wrong when fetching admin lists"
-      //   );
+      toast.error(e.response.data.error.code);
+      if (e.response.data.error.code === 401) {
+        location.reload();
+      }
+
+      // // let error = e.response;
+      // if (error.status === 401) {
+      //   console.log("unauth");
       // }
     }
   };
