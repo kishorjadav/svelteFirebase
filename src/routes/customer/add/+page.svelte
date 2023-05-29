@@ -51,6 +51,7 @@
 
   let result: any;
   let users: any = [];
+
   // pop ups
 
   $: addCustomerPopup = false;
@@ -283,7 +284,7 @@
                   edate: values.edate,
                   userId: $authUserStore.currentUser[0],
                   custId: Math.floor(Math.random() * 100 + 1),
-                  tags: ["cooking", "reading"],
+                  tags: value,
                 },
               ],
             }
@@ -482,7 +483,7 @@
                 class="block text-sm font-medium leading-6 text-gray-900 mb-4"
                 >Hobbies</label
               >
-              <Tags id="lang" value={["ES", "RU"]}>
+              <Tags id="lang" bind:value>
                 <option value="cooking">Cooking</option>
                 <option value="reading">Reading</option>
                 <option value="sleeping">Sleeping</option>

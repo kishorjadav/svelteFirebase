@@ -68,10 +68,33 @@ export const customerSchema = yup.object().shape({
         .required(),
     sdate: yup.string().label('Start date').required(),
     edate: yup.string().label('End date').required(),
+
+    // sdate: yup
+    //     .date()
+    //     .required()
+    //     .typeError('Start date is a requried field'),
+    // endDate: yup
+    //     .date()
+    //     .required()
+    //     .typeError('End date is a requried field')
+    //     .min(yup.ref('startDate'), 'End date has to be more than start date')
+    //     .when(
+    //         'startDate',
+    //         (sdate, schema) =>
+    //             sdate &&
+    //             schema.min(sdate, 'Date must be greater or equal to start date'),
+    //     ),
+
+
+
+
     // sdate: yup.date().label('Start date').required(),
     // edate: yup
     //     .date()
-    //     .min(yup.ref('sdate'), 'End date cannot be earlier than start date').required(),
+    //     .required()
+    //     .typeError('End date is a requried field')
+    //     .min(yup.ref('sdate'), 'End date cannot be earlier than start date'),
+
 });
 
 
