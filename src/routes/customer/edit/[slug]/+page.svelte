@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { db, storage } from "../../../lib/firebase/firebase.client";
+  import { page } from "$app/stores";
+  import { db, storage } from "../../../../lib/firebase/firebase.client";
   import {
     collection,
     doc,
@@ -21,24 +22,24 @@
     getDownloadURL,
   } from "firebase/storage";
 
-  import { authUserStore } from "../../../store";
+  import { authUserStore } from "../../../../store";
 
   import { onMount } from "svelte";
 
-  import { useToast } from "../../../lib/toastify/toastify";
-  import { useAxios } from "../../../services/useAxios";
+  import { useToast } from "../../../../lib/toastify/toastify";
+  import { useAxios } from "../../../../services/useAxios";
   import { createForm } from "svelte-forms-lib";
-  import { customerSchema } from "../../../schemas/customValidation";
+  import { customerSchema } from "../../../../schemas/customValidation";
   import Select from "svelte-select";
-  import CountyCode from "../countryCode.json";
+  import CountyCode from "../../countryCode.json";
   import SveltyPicker from "svelty-picker";
-  import Tags from "../../../lib/components/forms/tags.svelte";
+  import Tags from "../../../../lib/components/forms/tags.svelte";
 
   // import DatePicker from "../../lib/components/UI/DatePicker.svelte";
 
   import axios from "axios";
 
-  import { accessStore } from "../../../cookies/cookieStore";
+  import { accessStore } from "../../../../cookies/cookieStore";
 
   import ColorPicker from "svelte-awesome-color-picker";
   import Dropzone from "svelte-file-dropzone/Dropzone.svelte";
@@ -56,7 +57,7 @@
   $: addCustomerPopup = false;
   $: editCustomerPopup = false;
 
-  let fields = {
+  $: fields = {
     email: "",
     firstName: "",
     lastName: "",
@@ -70,6 +71,7 @@
     edate: "",
     tags: [],
   };
+  let selected;
   let collectionss = CountyCode;
 
   let hex; // or hsv or hex
@@ -91,8 +93,8 @@
   let temp = "";
   let selectedImage = null;
   let selectedPdf = null;
-  let value;
-  let getAllCustomers = [];
+  let value = [];
+  $: getAllCustomers = [];
 
   onMount(async () => {
     fetchData();
@@ -101,6 +103,7 @@
   // fetch data
   $: fetchData = async () => {
     try {
+      console.log("iddd", $page.params.slug);
       const docRef = doc(
         db,
         "customerCollection",
@@ -110,13 +113,24 @@
 
       if (docSnap.exists()) {
         getAllCustomers = docSnap.data().customers;
-        console.log("Document datassss:", getAllCustomers);
-      } else {
-        // docSnap.data() will be undefined in this case
-        console.log("No such document!");
+        console.log("Document edit datassss:", getAllCustomers[0].tags);
+        if (getAllCustomers) {
+          fields.email = getAllCustomers[0].email;
+          fields.firstName = getAllCustomers[0].firstName;
+          fields.lastName = getAllCustomers[0].lastName;
+          fields.color = getAllCustomers[0].color;
+          fields.photo = getAllCustomers[0].photo;
+          fields.pdf = getAllCustomers[0].pdf;
+          fields.country_code = getAllCustomers[0].country_code;
+          fields.country_code_label = getAllCustomers[0].country_code_label;
+          fields.phone = getAllCustomers[0].phone;
+          fields.sdate = getAllCustomers[0].sdate;
+          fields.edate = getAllCustomers[0].edate;
+          value = getAllCustomers[0].tags;
+        }
       }
     } catch (e) {
-      console.log("error");
+      console.log("error", $page.params.slug);
     }
   };
 
@@ -219,52 +233,12 @@
   const { form, errors, state, handleChange, handleSubmit, handleReset } =
     createForm({
       initialValues: fields,
-      validationSchema: customerSchema,
+      validationSchema: "",
       //customerSchema
       onSubmit: async (values) => {
         try {
-          // Add a new document with a generated id
-          // Add a new document with a generated id
+          values = fields;
           console.log("testß", values, $authUserStore.currentUser[0]);
-
-          //   await setDoc(
-          //     doc(db, "customerCollection", $authUserStore.currentUser[0]),
-          //     {
-          //       customers: [
-          //         {
-          //           email: values.email,
-          //           firstName: values.firstName,
-          //           color: hex,
-          //           photo: selectedImage,
-          //           pdf: selectedPdf,
-          //           country_code: values.country_code,
-          //           phone: values.phone,
-          //           sdate: values.sdate,
-          //           edate: values.edate,
-          //           userId: $authUserStore.currentUser[0],
-          //           custId: Math.floor(Math.random() * 100 + 1),
-          //         },
-          //         { merge: true },
-          //       ],
-          //       // tags: ["sellping", "eating"],
-          //     }
-          //   );
-
-          const storage = getStorage();
-          const imgRef = ref(storage, $authUserStore.currentUser[0]);
-          const pdfRef = ref(storage, $authUserStore.currentUser[0] + "pdf");
-
-          // 'file' comes from the Blob or File API
-          let files = uploadBytes(imgRef, imgurl).then((snapshot) => {
-            console.log("Uploaded a blob or file!", imgurl, snapshot, imgRef);
-          });
-          let pdffiles = uploadBytes(pdfRef, pdfurl).then((snapshot) => {
-            console.log("Uploaded a blob or file!", pdfurl, snapshot, imgRef);
-          });
-          // Upload completed successfully, now we can get the download URL
-          //   getDownloadURL(files).then((downloadURL) => {
-          //     console.log("File available at", downloadURL);
-          //   });
 
           await updateDoc(
             doc(db, "customerCollection", $authUserStore.currentUser[0]),
@@ -275,14 +249,15 @@
                   firstName: values.firstName,
                   lastName: values.lastName,
                   color: hex,
-                  photo: `https://firebasestorage.googleapis.com/v0/b/sveltekit-auth-39155.appspot.com/o/${$authUserStore.currentUser[0]}?alt=media&token=bb73397c-94d6-49c1-a862-6c6ea9fa204d`,
-                  pdf: `https://firebasestorage.googleapis.com/v0/b/sveltekit-auth-39155.appspot.com/o/${$authUserStore.currentUser[0]}pdf?alt=media&token=2b0de916-1f28-4d1f-9a83-4dec6701f58f`,
+                  photo: fields.photo,
+                  // pdf: `https://firebasestorage.googleapis.com/v0/b/sveltekit-auth-39155.appspot.com/o/${$authUserStore.currentUser[0]}pdf?alt=media&token=2b0de916-1f28-4d1f-9a83-4dec6701f58f`,
                   country_code: values.country_code,
                   phone: values.phone,
                   sdate: values.sdate,
                   edate: values.edate,
                   userId: $authUserStore.currentUser[0],
                   custId: Math.floor(Math.random() * 100 + 1),
+                  tags: value,
                 },
               ],
             }
@@ -304,7 +279,7 @@
     <div class="grid grid-cols-1 gap-x-8 gap-y-8 md:grid-cols-3">
       <div class="px-4 sm:px-0">
         <h2 class="text-base font-semibold leading-7 text-gray-900">
-          Update Customer
+          Update Customer {value}
         </h2>
         <p class="mt-1 text-sm leading-6 text-gray-600">
           This information will not be displayed publicy.
@@ -330,7 +305,7 @@
                   type="text"
                   name="firstName"
                   id="firstName"
-                  bind:value={$form.firstName}
+                  bind:value={fields.firstName}
                   on:change={handleChange}
                   on:blur={handleChange}
                   class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
@@ -353,7 +328,7 @@
                   type="text"
                   name="firstName"
                   id="firstName"
-                  bind:value={$form.lastName}
+                  bind:value={fields.lastName}
                   on:change={handleChange}
                   on:blur={handleChange}
                   class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
@@ -394,7 +369,7 @@
                   type="email"
                   name="email"
                   id="email"
-                  bind:value={$form.email}
+                  bind:value={fields.email}
                   on:change={handleChange}
                   on:blur={handleChange}
                   class="block w-full rounded-md border-0 py-1.5 pl-10 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
@@ -412,7 +387,8 @@
                 class="block text-sm font-medium leading-6 text-gray-900"
                 >Profile Image</label
               >
-              {#if files.accepted.length === 0}
+              <img class="rounded-full w-24 h-24" src={fields.photo} alt="" />
+              <!-- {#if files.accepted.length === 0}
                 <Dropzone
                   on:drop={handleFilesSelect}
                   on:dragover={handleDragOver}
@@ -443,7 +419,7 @@
                     </div>
                   </div>
                 </div>
-              {/if}
+              {/if} -->
               <ol class="text-indigo-500 text-sm">
                 {#if files.accepted[0]}
                   <div class="flex m-1 w-full text-xs text-gray-400">
@@ -481,7 +457,7 @@
                 class="block text-sm font-medium leading-6 text-gray-900 mb-4"
                 >Hobbies</label
               >
-              <Tags id="lang" value={["ES", "RU"]}>
+              <Tags id="lang" bind:value>
                 <option value="cooking">Cooking</option>
                 <option value="reading">Reading</option>
                 <option value="sleeping">Sleeping</option>
@@ -496,7 +472,7 @@
               <SveltyPicker
                 inputClasses="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 format="dd-mm-yyyy"
-                bind:value={$form.sdate}
+                bind:value={fields.sdate}
                 name="sdate"
               />
               {#if $errors.sdate}
@@ -511,7 +487,7 @@
               <SveltyPicker
                 inputClasses="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 format="dd-mm-yyyy"
-                bind:value={$form.edate}
+                bind:value={fields.edate}
                 name="edate"
               />
               {#if $errors.edate}
@@ -528,9 +504,9 @@
                   <Select
                     class="country-code"
                     items={collectionss}
-                    value={$form.country_code}
+                    value={fields.country_code}
                     on:change={(e) => {
-                      $form.country_code = e.detail.value;
+                      fields.country_code = e.detail.value;
                       $form.country_code_label = e.detail.iso;
                     }}
                   />
@@ -542,7 +518,7 @@
                     placeholder="Enter your number"
                     name="phone"
                     id="phone"
-                    bind:value={$form.phone}
+                    bind:value={fields.phone}
                     on:change={handleChange}
                     on:blur={handleChange}
                   />
@@ -554,7 +530,7 @@
             </section>
 
             <!-- pdf upload -->
-            <div class="sm:col-span-6">
+            <!-- <div class="sm:col-span-6">
               <label
                 for="email"
                 class="block text-sm font-medium leading-6 text-gray-900"
@@ -567,24 +543,10 @@
                   {#if pdffiles.accepted[1].path || pdffiles.accepted[0].path}
                     {pdffiles.accepted[1].path}
                   {/if}
-                  <!-- {#each pdffiles.accepted as itemss}
-                    <li class="flex justify-between">
-                      <div class="text-sm text-indigo-600">
-                        {itemss.name}
-                      </div>
-                      <div class="">
-                        <button
-                          class="text-red-700 no-underline button-strip"
-                          on:click={handleRemovePdf}
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    </li>
-                  {/each} -->
+                  
                 </ol>
               {/if}
-            </div>
+            </div> -->
           </div>
         </div>
         <div
