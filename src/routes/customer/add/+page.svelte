@@ -226,6 +226,21 @@
         try {
           // Add a new document with a generated id
           // Add a new document with a generated id
+          function generateRandomUUID() {
+            return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+              /[xy]/g,
+              function (c) {
+                const r = (Math.random() * 16) | 0;
+                const v = c === "x" ? r : (r & 0x3) | 0x8;
+                return v.toString(16);
+              }
+            );
+          }
+
+          // Generate a random UUID
+          const randomUUID = generateRandomUUID();
+
+          console.log("randomUUID", randomUUID);
           console.log("testß", values, $authUserStore.currentUser[0]);
 
           //   await setDoc(
@@ -266,29 +281,23 @@
           //   getDownloadURL(files).then((downloadURL) => {
           //     console.log("File available at", downloadURL);
           //   });
-
-          await updateDoc(
-            doc(db, "customerCollection", $authUserStore.currentUser[0]),
-            {
-              customers: [
-                {
-                  email: values.email,
-                  firstName: values.firstName,
-                  lastName: values.lastName,
-                  color: hex,
-                  photo: `https://firebasestorage.googleapis.com/v0/b/sveltekit-auth-39155.appspot.com/o/${$authUserStore.currentUser[0]}?alt=media&token=bb73397c-94d6-49c1-a862-6c6ea9fa204d`,
-                  pdf: `https://firebasestorage.googleapis.com/v0/b/sveltekit-auth-39155.appspot.com/o/${$authUserStore.currentUser[0]}pdf?alt=media&token=2b0de916-1f28-4d1f-9a83-4dec6701f58f`,
-                  country_code: values.country_code,
-                  phone: values.phone,
-                  sdate: values.sdate,
-                  edate: values.edate,
-                  userId: $authUserStore.currentUser[0],
-                  custId: Math.floor(Math.random() * 100 + 1),
-                  tags: value,
-                },
-              ],
-            }
-          );
+          if (randomUUID) {
+            await setDoc(doc(db, "customerCollection", randomUUID), {
+              email: values.email,
+              firstName: values.firstName,
+              lastName: values.lastName,
+              color: hex,
+              photo: `https://firebasestorage.googleapis.com/v0/b/sveltekit-auth-39155.appspot.com/o/${$authUserStore.currentUser[0]}?alt=media&token=bb73397c-94d6-49c1-a862-6c6ea9fa204d`,
+              pdf: `https://firebasestorage.googleapis.com/v0/b/sveltekit-auth-39155.appspot.com/o/${$authUserStore.currentUser[0]}pdf?alt=media&token=2b0de916-1f28-4d1f-9a83-4dec6701f58f`,
+              country_code: values.country_code,
+              phone: values.phone,
+              sdate: values.sdate,
+              edate: values.edate,
+              userId: $authUserStore.currentUser[0],
+              custId: randomUUID,
+              tags: value,
+            });
+          }
           goto("/customer");
           addCustomerPopup = false;
           editCustomerPopup = false;
@@ -353,13 +362,13 @@
               <div class="mt-2">
                 <input
                   type="text"
-                  name="firstName"
-                  id="firstName"
+                  name="lastName"
+                  id="lastName"
                   bind:value={$form.lastName}
                   on:change={handleChange}
                   on:blur={handleChange}
                   class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                  placeholder="firstName"
+                  placeholder="lastName"
                 />
                 {#if $errors.lastName}
                   <small class="text-red-600">{$errors.lastName}</small>

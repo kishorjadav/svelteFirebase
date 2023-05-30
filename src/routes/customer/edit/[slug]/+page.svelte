@@ -104,29 +104,26 @@
   $: fetchData = async () => {
     try {
       console.log("iddd", $page.params.slug);
-      const docRef = doc(
-        db,
-        "customerCollection",
-        $authUserStore.currentUser[0]
-      );
+      const docRef = doc(db, "customerCollection", $page.params.slug);
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-        getAllCustomers = docSnap.data().customers;
-        console.log("Document edit datassss:", getAllCustomers[0].tags);
+        getAllCustomers = docSnap.data();
+        console.log("edit id data getAllCustomers", getAllCustomers);
+        console.log("Document edit datassss:", getAllCustomers.tags);
         if (getAllCustomers) {
-          fields.email = getAllCustomers[0].email;
-          fields.firstName = getAllCustomers[0].firstName;
-          fields.lastName = getAllCustomers[0].lastName;
-          fields.color = getAllCustomers[0].color;
-          fields.photo = getAllCustomers[0].photo;
-          fields.pdf = getAllCustomers[0].pdf;
-          fields.country_code = getAllCustomers[0].country_code;
-          fields.country_code_label = getAllCustomers[0].country_code_label;
-          fields.phone = getAllCustomers[0].phone;
-          fields.sdate = getAllCustomers[0].sdate;
-          fields.edate = getAllCustomers[0].edate;
-          value = getAllCustomers[0].tags;
+          fields.email = getAllCustomers.email;
+          fields.firstName = getAllCustomers.firstName;
+          fields.lastName = getAllCustomers.lastName;
+          fields.color = getAllCustomers.color;
+          fields.photo = getAllCustomers.photo;
+          fields.pdf = getAllCustomers.pdf;
+          fields.country_code = getAllCustomers.country_code;
+          fields.country_code_label = getAllCustomers.country_code_label;
+          fields.phone = getAllCustomers.phone;
+          fields.sdate = getAllCustomers.sdate;
+          fields.edate = getAllCustomers.edate;
+          value = getAllCustomers.tags;
         }
       }
     } catch (e) {
@@ -240,28 +237,21 @@
           values = fields;
           console.log("testß", values, $authUserStore.currentUser[0]);
 
-          await updateDoc(
-            doc(db, "customerCollection", $authUserStore.currentUser[0]),
-            {
-              customers: [
-                {
-                  email: values.email,
-                  firstName: values.firstName,
-                  lastName: values.lastName,
-                  color: hex,
-                  photo: fields.photo,
-                  // pdf: `https://firebasestorage.googleapis.com/v0/b/sveltekit-auth-39155.appspot.com/o/${$authUserStore.currentUser[0]}pdf?alt=media&token=2b0de916-1f28-4d1f-9a83-4dec6701f58f`,
-                  country_code: values.country_code,
-                  phone: values.phone,
-                  sdate: values.sdate,
-                  edate: values.edate,
-                  userId: $authUserStore.currentUser[0],
-                  custId: Math.floor(Math.random() * 100 + 1),
-                  tags: value,
-                },
-              ],
-            }
-          );
+          await updateDoc(doc(db, "customerCollection", $page.params.slug), {
+            email: values.email,
+            firstName: values.firstName,
+            lastName: values.lastName,
+            color: hex,
+            photo: fields.photo,
+            // pdf: `https://firebasestorage.googleapis.com/v0/b/sveltekit-auth-39155.appspot.com/o/${$authUserStore.currentUser[0]}pdf?alt=media&token=2b0de916-1f28-4d1f-9a83-4dec6701f58f`,
+            country_code: values.country_code,
+            phone: values.phone,
+            sdate: values.sdate,
+            edate: values.edate,
+            userId: $authUserStore.currentUser[0],
+            custId: $page.params.slug,
+            tags: value,
+          });
           goto("/customer");
           addCustomerPopup = false;
           editCustomerPopup = false;
@@ -552,10 +542,10 @@
         <div
           class="flex items-center justify-end gap-x-6 border-t border-gray-900/10 px-4 py-4 sm:px-8"
         >
-          <button
-            on:click={closePopup}
+          <a
+            href="/customer"
             type="button"
-            class="text-sm font-semibold leading-6 text-gray-900">Cancel</button
+            class="text-sm font-semibold leading-6 text-gray-900">Cancel</a
           >
           <button
             type="submit"

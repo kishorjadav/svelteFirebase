@@ -41,6 +41,7 @@
 
   import ColorPicker from "svelte-awesome-color-picker";
   import Dropzone from "svelte-file-dropzone/Dropzone.svelte";
+  import { goto } from "$app/navigation";
 
   const toast = useToast();
   const fetch = useAxios();
@@ -105,20 +106,31 @@
   // fetch data
   $: fetchData = async () => {
     try {
-      const docRef = doc(
-        db,
-        "customerCollection",
-        $authUserStore.currentUser[0]
-      );
-      const docSnap = await getDoc(docRef);
+      const colRef = await collection(db, "customerCollection");
+      const docsSnap = await getDocs(colRef);
+      console.log("docsSnap", docsSnap);
 
-      if (docSnap.exists()) {
-        getAllCustomers = docSnap.data().customers;
-        console.log("Document datassss:", getAllCustomers);
-      } else {
-        // docSnap.data() will be undefined in this case
-        console.log("No such document!");
+      if (docsSnap) {
+        docsSnap.forEach((doc) => {
+          // console.log("alll", doc.data());
+          // arrLists.push(doc.data());
+          arrLists.push(doc.data());
+          arrLists = [...arrLists];
+          console.log("alll", arrLists);
+        });
       }
+
+      // const docRef = doc(db, "customerCollection");
+      // const docSnap = await getDocs(docRef);
+      console.log("checking", docSnap);
+
+      // if (docSnap.exists()) {
+      //   getAllCustomers = docSnap.data().customers;
+      //   console.log("Document datassss:", getAllCustomers);
+      // } else {
+      //   // docSnap.data() will be undefined in this case
+      //   console.log("No such document!");
+      // }
 
       // const res = await axios.post(
       //   "https://api.ipify.org/?format=json",
@@ -292,18 +304,18 @@
     try {
       console.log("delete", custId);
 
-      const custRef = doc(
-        db,
-        "customerCollection",
-        $authUserStore.currentUser[0]
-      );
+      await deleteDoc(doc(db, "customerCollection", custId));
+      // setInterval(fetchData, 2000);
+      location.reload();
 
       // Remove the 'capital' field from the document
-      await updateDoc(custRef, {
-        customers: deleteField(custId),
-      });
+      // Remove the 'capital' field from the document
 
-      fetchData();
+      // await updateDoc(custRef, {
+      //   customers: deleteField(custId),
+      // });
+      // fetchData();
+
       toast.error("Successfully deleted");
     } catch {
       toast.error("Error");
@@ -422,8 +434,8 @@
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-gray-800">
-                    {#if getAllCustomers}
-                      {#each Object.entries(getAllCustomers) as [key, users]}
+                    {#if arrLists}
+                      {#each Object.entries(arrLists) as [key, users]}
                         <tr>
                           <td>
                             <div class="flex items-center gap-x-4">
