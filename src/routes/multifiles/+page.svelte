@@ -163,7 +163,10 @@
 </script>
 
 <div class="div w-1/2 m-5">
-  <Dropzone on:drop={handleFilesSelect} />
+  <Dropzone
+    on:drop={handleFilesSelect}
+    accept="image/png,image/jpg,image/jpeg"
+  />
   <ol>
     {#each files.accepted as item}
       <li>{item.name}</li>
@@ -186,6 +189,7 @@
           class="rounded-full w-24 h-24 border border-black"
           src=" {urllll}"
         />
+        <a href={urllll}>View</a>
         <!-- <span on:click={() => handledeleteClick(i)}>
           {i}
           <svg
