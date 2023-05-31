@@ -73,6 +73,7 @@
   let hex; // or hsv or hex
 
   let arrLists = [];
+  let filteredCustomer = [];
 
   let files = {
     accepted: [],
@@ -114,9 +115,26 @@
         docsSnap.forEach((doc) => {
           // console.log("alll", doc.data());
           // arrLists.push(doc.data());
+
+          //to get all the documnet fom the firestore
           arrLists.push(doc.data());
           arrLists = [...arrLists];
-          console.log("alll", arrLists);
+
+          //filtering documents based on the loged in customers
+          filteredCustomer = arrLists
+            .filter(
+              (collect) => collect.userId === $authUserStore.currentUser[0]
+            )
+            .map((collect) => collect);
+
+          // console.log(
+          //   "alll",
+          //   arrLists
+          //     .filter(
+          //       (collect) => collect.userId === $authUserStore.currentUser[0]
+          //     )
+          //     .map((collect) => collect.custId)
+          // );
         });
       }
 
@@ -434,8 +452,8 @@
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-gray-800">
-                    {#if arrLists}
-                      {#each Object.entries(arrLists) as [key, users]}
+                    {#if filteredCustomer}
+                      {#each Object.entries(filteredCustomer) as [key, users]}
                         <tr>
                           <td>
                             <div class="flex items-center gap-x-4">
